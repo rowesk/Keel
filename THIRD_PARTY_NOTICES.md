@@ -4,7 +4,7 @@ Keel uses Apple system frameworks and the system SQLite library. It does not bun
 
 ## Image permissions
 
-Publication gate: icon and Home scene provenance is still being confirmed. This file must list the verified source and applicable terms for every bundled image before this repository becomes public. The code licence does not establish permission to redistribute third-party images.
+The app icon and bundled Home photographs are excluded from Keel's MIT code licence. Their source credits and redistribution terms have not yet been verified. Inclusion in this repository does not establish permission to reuse these assets.
 
 ## Palace Script MT Semi Bold
 
