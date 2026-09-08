@@ -262,16 +262,7 @@ final class ScreenSnapshotTests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) throws {
-        // Home intentionally falls back to macOS's script face when the user's
-        // optional Palace Script font is absent. Compare the actual face against
-        // its own reviewed baseline, with the same pixel tolerance.
-        let comparisonDirectory: URL
-        if name.hasPrefix("home-"), NSFont(name: "PalaceScriptMT-SemiBold", size: 20) == nil {
-            let variant = NSFont(name: "SnellRoundhand-Bold", size: 20) == nil ? "serif" : "snell-roundhand"
-            comparisonDirectory = Self.baselineDirectory.appendingPathComponent(variant)
-        } else {
-            comparisonDirectory = Self.baselineDirectory
-        }
+        let comparisonDirectory = Self.baselineDirectory
         for appearance in Appearance.allCases {
             // Compare like with like. A freshly rendered rep and a PNG-decoded
             // one can hold the same picture in different colour spaces, which

@@ -1,4 +1,5 @@
 import AppKit
+import CoreText
 import SwiftUI
 
 /// The one place Keel decides what a surface, a radius, or a gap is worth.
@@ -144,10 +145,17 @@ public enum KeelDesign {
         return Bundle(for: KeelDesignBundleMarker.self)
     }()
 
-    /// The wordmark face. Palace Script MT Semi Bold when installed, Snell
-    /// Roundhand (ships with macOS) otherwise, then a serif italic. Sets one
-    /// string, "Keel", at most once per surface.
+    /// Register once for this process. This does not install the font on the Mac.
+    private static let registerWordmarkFont: Void = {
+        guard let url = resourceBundle?.url(forResource: "PalaceScriptMT-SemiBold", withExtension: "ttf") else {
+            return
+        }
+        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+    }()
+
+    /// The bundled wordmark face, with system fallbacks if registration fails.
     public static func wordmarkFont(size: CGFloat) -> Font {
+        _ = registerWordmarkFont
         if NSFont(name: "PalaceScriptMT-SemiBold", size: size) != nil {
             return Font.custom("PalaceScriptMT-SemiBold", size: size)
         }

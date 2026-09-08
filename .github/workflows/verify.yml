@@ -51,4 +51,4 @@ jobs:
         run: git diff --check
 
 # Signing and notarization belong to a separately approved release job.
-# This workflow uses no signing credentials and publishes no artifacts.
+# This workflow uses no signing credentials and publishes no release artifacts.

@@ -50,7 +50,7 @@ Scripts/verify.sh
 
 The gate runs tests and snapshot comparisons, compiles with warnings as errors, builds a development-signed app, and checks whitespace. It disables foreground tests and snapshot recording. A signing certificate is required for its build step.
 
-Snapshot baselines depend on the macOS rendering environment. Inspect a mismatch before deciding whether a visual change is intended. Never record new baselines simply to make a check pass.
+Snapshot baselines use the en_GB locale and Europe/London time zone. Hosted CI sets these only on its disposable runner. Keel bundles Palace Script for the Home wordmark, so local and hosted runs use the same font. Inspect a mismatch before deciding whether a visual change is intended. Never record new baselines simply to make a check pass, and do not change your Mac's global settings just to run tests.
 
 ## Where the code lives
 
