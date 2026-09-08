@@ -53,7 +53,8 @@ final class KeelInteractionReceiptTests: XCTestCase {
         let pageView = try XCTUnwrap(webView(in: shell))
 
         var fixtureLoaded = false
-        for _ in 0..<100 {
+        // Match the bounded readiness wait used by the other production states.
+        for _ in 0..<500 {
             if let text = try? await pageView.evaluateJavaScript("document.body.innerText") as? String,
                text.contains("Local reading fixture") { fixtureLoaded = true; break }
             try await Task.sleep(for: .milliseconds(10))

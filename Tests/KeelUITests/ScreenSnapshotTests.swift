@@ -262,16 +262,26 @@ final class ScreenSnapshotTests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) throws {
+        // Home intentionally falls back to macOS's script face when the user's
+        // optional Palace Script font is absent. Compare the actual face against
+        // its own reviewed baseline, with the same pixel tolerance.
+        let comparisonDirectory: URL
+        if name.hasPrefix("home-"), NSFont(name: "PalaceScriptMT-SemiBold", size: 20) == nil {
+            let variant = NSFont(name: "SnellRoundhand-Bold", size: 20) == nil ? "serif" : "snell-roundhand"
+            comparisonDirectory = Self.baselineDirectory.appendingPathComponent(variant)
+        } else {
+            comparisonDirectory = Self.baselineDirectory
+        }
         for appearance in Appearance.allCases {
             // Compare like with like. A freshly rendered rep and a PNG-decoded
             // one can hold the same picture in different colour spaces, which
             // reads as a few units of drift on most pixels and fails every run.
             let rendered = try Self.normalised(render(view, size: size, appearance: appearance))
-            let baselineURL = Self.baselineDirectory.appendingPathComponent("\(name)-\(appearance.suffix).png")
+            let baselineURL = comparisonDirectory.appendingPathComponent("\(name)-\(appearance.suffix).png")
 
             guard !isRecording else {
                 try FileManager.default.createDirectory(
-                    at: Self.baselineDirectory,
+                    at: comparisonDirectory,
                     withIntermediateDirectories: true
                 )
                 let data: Data = try rendered.pngData()
@@ -283,6 +293,8 @@ final class ScreenSnapshotTests: XCTestCase {
             guard let baselineData = try? Data(contentsOf: baselineURL),
                   let baseline = NSBitmapImageRep(data: baselineData)
             else {
+                try FileManager.default.createDirectory(at: comparisonDirectory, withIntermediateDirectories: true)
+                try rendered.pngData().write(to: comparisonDirectory.appendingPathComponent("\(name)-\(appearance.suffix).failed.png"))
                 XCTFail(
                     "No baseline for \(name)-\(appearance.suffix). Record with KEEL_RECORD_SNAPSHOTS=1.",
                     file: file,
@@ -295,7 +307,7 @@ final class ScreenSnapshotTests: XCTestCase {
             if difference > Self.tolerance {
                 if let data = try? rendered.pngData() as Data {
                     try? data.write(
-                        to: Self.baselineDirectory.appendingPathComponent("\(name)-\(appearance.suffix).failed.png")
+                        to: comparisonDirectory.appendingPathComponent("\(name)-\(appearance.suffix).failed.png")
                     )
                 }
                 XCTFail(

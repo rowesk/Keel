@@ -854,6 +854,8 @@ final class KeelWebOffscreenIntegrationMatrixTests: XCTestCase {
         try await waitForURL(original, fixture.url(path: "/state"))
         try await waitForElement("#scroll-target", in: original)
         try await waitUntil { !original.isLoading }
+        let beforeScroll = try NSKeyedArchiver.archivedData(
+            withRootObject: XCTUnwrap(original.interactionState), requiringSecureCoding: false)
         let configured: String
         do {
             configured = try await original.evaluateString("""
@@ -866,9 +868,17 @@ final class KeelWebOffscreenIntegrationMatrixTests: XCTestCase {
             return
         }
         XCTAssertEqual(configured, "configured")
-        try await Task.sleep(for: .milliseconds(500))
+        try await waitForJavaScriptValue("String(window.scrollY)", expected: "900", in: original)
         let originalScroll = try await original.evaluateString("String(window.scrollY)")
         XCTAssertEqual(originalScroll, "900")
+        // JavaScript can report the new offset before WebKit sends its opaque
+        // restoration state back to this process. Close only after that update.
+        try await waitUntil(timeout: 5) {
+            guard let state = original.interactionState,
+                  let archived = try? NSKeyedArchiver.archivedData(withRootObject: state, requiringSecureCoding: false)
+            else { return false }
+            return archived != beforeScroll
+        }
 
         browser.closeActivePage()
         await browser.waitForIdleForTesting()
@@ -880,7 +890,8 @@ final class KeelWebOffscreenIntegrationMatrixTests: XCTestCase {
         let restored = factory.webViews[1]
         try await waitForURL(restored, fixture.url(path: "/state"))
         try await waitForElement("#scroll-target", in: restored)
-        try await Task.sleep(for: .milliseconds(300))
+        try await waitUntil(timeout: 5) { !restored.isLoading }
+        try await waitForJavaScriptValue("String(Math.round(window.scrollY))", expected: "900", in: restored)
         let state: String
         do {
             state = try await restored.evaluateString("""
@@ -974,6 +985,18 @@ final class KeelWebOffscreenIntegrationMatrixTests: XCTestCase {
             if found == "true" { return }
             try await Task.sleep(for: .milliseconds(10))
         }
+        throw WaitError.timedOut
+    }
+
+    private func waitForJavaScriptValue(_ script: String, expected: String, in webView: WKWebView) async throws {
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        var lastValue: String?
+        while ContinuousClock.now < deadline {
+            lastValue = try? await webView.evaluateString(script)
+            if lastValue == expected { return }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTFail("Timed out waiting for WebKit value \(expected); last value: \(lastValue ?? "unavailable")")
         throw WaitError.timedOut
     }
 

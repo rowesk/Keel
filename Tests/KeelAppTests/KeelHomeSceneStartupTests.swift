@@ -23,7 +23,8 @@ final class KeelHomeSceneStartupTests: XCTestCase {
         controller.arriveAtHome()
         await controller.loadLibrary()
         XCTAssertEqual(controller.currentSceneID, .user(row.id), "Late library loading must replace the initial fallback with the saved photo")
-        for _ in 0..<100 where controller.currentDisplay.image == nil {
+        // Decode completes on a worker. A cold CI image can take over a second.
+        for _ in 0..<500 where controller.currentDisplay.image == nil {
             try await Task.sleep(for: .milliseconds(10))
         }
         XCTAssertNotNil(controller.currentDisplay.image)

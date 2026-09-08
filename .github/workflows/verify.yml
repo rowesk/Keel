@@ -20,6 +20,7 @@ jobs:
     env:
       KEEL_ALLOW_FOREGROUND_TESTS: "0"
       KEEL_RECORD_SNAPSHOTS: "0"
+      TZ: Europe/London
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -29,6 +30,11 @@ jobs:
           sw_vers
           swift --version
           xcrun --show-sdk-version
+      - name: Set the snapshot locale on this disposable runner
+        run: |
+          defaults write NSGlobalDomain AppleLocale -string en_GB
+          defaults write NSGlobalDomain AppleLanguages -array en-GB
+          swift -e 'import AppKit; print(Locale.current.identifier); print(TimeZone.current.identifier); print(["PalaceScriptMT-SemiBold", "SnellRoundhand-Bold"].map { ($0, NSFont(name: $0, size: 20) != nil) })'
       - name: Test and compare snapshots
         run: swift test --scratch-path "$RUNNER_TEMP/keel-tests" -Xswiftc -warnings-as-errors
       - name: Keep failed visual comparisons for review
@@ -36,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: failed-snapshots
-          path: Tests/KeelUITests/__Snapshots__/*.failed.png
+          path: Tests/KeelUITests/__Snapshots__/**/*.failed.png
           if-no-files-found: ignore
           retention-days: 7
       - name: Compile release executable
