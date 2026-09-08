@@ -31,6 +31,14 @@ jobs:
           xcrun --show-sdk-version
       - name: Test and compare snapshots
         run: swift test --scratch-path "$RUNNER_TEMP/keel-tests" -Xswiftc -warnings-as-errors
+      - name: Keep failed visual comparisons for review
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: failed-snapshots
+          path: Tests/KeelUITests/__Snapshots__/*.failed.png
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Compile release executable
         run: swift build --configuration release --scratch-path "$RUNNER_TEMP/keel-release" --product Keel -Xswiftc -warnings-as-errors
       - name: Check whitespace
