@@ -14,8 +14,11 @@ final class KeelHomeSceneStartupTests: XCTestCase {
         let paths = KeelPaths(applicationSupportDirectory: directory)
         let store = try KeelStore(paths: paths)
         let calls = Mutex(0)
+        let decoded = expectation(description: "The current display request reaches the decoder")
+        decoded.assertForOverFulfill = true
         let decoder: @Sendable (URL, Int) -> KeelHomeSceneDecoder.Decoded? = { _, _ in
             calls.withLock { $0 += 1 }
+            decoded.fulfill()
             return nil
         }
         var discarded: KeelHomeSceneController? = KeelHomeSceneController(
@@ -25,8 +28,7 @@ final class KeelHomeSceneStartupTests: XCTestCase {
         let current = KeelHomeSceneController(
             store: store, paths: paths, window: { nil }, persistSettings: { _ in }, decodeImage: decoder)
         for _ in 0..<20 { current.arriveAtHome() }
-        // Let queued main-actor requests and their worker completions drain.
-        try await Task.sleep(for: .milliseconds(200))
+        await fulfillment(of: [decoded], timeout: 5)
         XCTAssertEqual(calls.withLock { $0 }, 1, "Only the surviving controller's latest request should decode")
         withExtendedLifetime(current) {}
     }
