@@ -1,0 +1,72 @@
+[
+  {
+    "bottomLuminance": 0.21,
+    "file": "como.heic",
+    "id": "como",
+    "name": "Como",
+    "topLuminance": 0.34
+  },
+  {
+    "bottomLuminance": 0.22,
+    "file": "como2.heic",
+    "id": "como2",
+    "name": "Como 2",
+    "topLuminance": 0.28
+  },
+  {
+    "bottomLuminance": 0.16,
+    "file": "adrien-olichon.heic",
+    "id": "adrien-olichon",
+    "name": "Adrien Olichon",
+    "topLuminance": 0.17
+  },
+  {
+    "bottomLuminance": 0.05,
+    "file": "adrien-olichon-2.heic",
+    "id": "adrien-olichon-2",
+    "name": "Adrien Olichon 2",
+    "topLuminance": 0.09
+  },
+  {
+    "bottomLuminance": 0.07,
+    "file": "adrien-olichon3.heic",
+    "id": "adrien-olichon3",
+    "name": "Adrien Olichon 3",
+    "topLuminance": 0.24
+  },
+  {
+    "bottomLuminance": 0.03,
+    "file": "adrien-olichon4.heic",
+    "id": "adrien-olichon4",
+    "name": "Adrien Olichon 4",
+    "topLuminance": 0.02
+  },
+  {
+    "bottomLuminance": 0.69,
+    "file": "eberhardgross.heic",
+    "id": "eberhardgross",
+    "name": "Eberhard Gross",
+    "topLuminance": 0.6
+  },
+  {
+    "bottomLuminance": 0.24,
+    "file": "mountains.heic",
+    "id": "mountains",
+    "name": "Mountains",
+    "topLuminance": 0.84
+  },
+  {
+    "bottomLuminance": 0.47,
+    "file": "nrlh-semiz.heic",
+    "id": "nrlh-semiz",
+    "name": "Nrlh Semiz",
+    "topLuminance": 0.6
+  },
+  {
+    "bottomLuminance": 0.18,
+    "file": "zkadoshi.heic",
+    "id": "zkadoshi",
+    "name": "Zkadoshi",
+    "topLuminance": 0.44
+  }
+]

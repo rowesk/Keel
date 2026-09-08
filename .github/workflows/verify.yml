@@ -1,0 +1,40 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      KEEL_ALLOW_FOREGROUND_TESTS: "0"
+      KEEL_RECORD_SNAPSHOTS: "0"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Record toolchain
+        run: |
+          sw_vers
+          swift --version
+          xcrun --show-sdk-version
+      - name: Test and compare snapshots
+        run: swift test --scratch-path "$RUNNER_TEMP/keel-tests" -Xswiftc -warnings-as-errors
+      - name: Compile release executable
+        run: swift build --configuration release --scratch-path "$RUNNER_TEMP/keel-release" --product Keel -Xswiftc -warnings-as-errors
+      - name: Check whitespace
+        run: git diff --check
+
+# Signing and notarization belong to a separately approved release job.
+# This workflow uses no signing credentials and publishes no artifacts.

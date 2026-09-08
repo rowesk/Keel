@@ -1,0 +1,34 @@
+name: Bug report
+description: Report a reproducible problem in Keel.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a public page or fictional data. Do not attach cookies, tokens, personal URLs, browser profiles, or private account screenshots. Do not report security vulnerabilities in this public form.
+  - type: input
+    id: environment
+    attributes:
+      label: macOS version and Keel build
+      placeholder: macOS version, chip, Keel version or source commit
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include a public URL or a small local example if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Describe what happened. Review any attachment for private information before sharing it.
+    validations:
+      required: true

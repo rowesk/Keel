@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose a change to a browsing workflow.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe a concrete browsing workflow and where Keel gets in the way.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: Explain how this would work with one active page and an unloaded queue.
+    validations:
+      required: true
