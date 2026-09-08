@@ -77,7 +77,13 @@ final class KeelAddressIntentIntegrationTests: XCTestCase {
         let context = "\(surface), suggestion=\(suggestion), enqueue=\(enqueue)"
         if enqueue {
             XCTAssertEqual(after.surface, before.surface, context)
-            XCTAssertEqual(after.activePage, before.activePage, context)
+            // The intentionally invalid URL may fail while the queue write awaits
+            // storage. Enqueue must preserve page/navigation identity, regardless
+            // of that independent network status update.
+            XCTAssertEqual(after.activePage?.id, before.activePage?.id, context)
+            XCTAssertEqual(after.activePage?.sessionID, before.activePage?.sessionID, context)
+            XCTAssertEqual(after.activePage?.currentNavigationID, before.activePage?.currentNavigationID, context)
+            XCTAssertEqual(after.activePage?.url, before.activePage?.url, context)
             XCTAssertEqual(after.runtimeState.queue.map(\.url), before.runtimeState.queue.map(\.url) + [target], context)
         } else {
             XCTAssertEqual(after.surface, .page, context)
