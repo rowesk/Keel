@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 import KeelFoundation
 import KeelStore
 import KeelUI
@@ -7,6 +8,29 @@ import XCTest
 
 @MainActor
 final class KeelHomeSceneStartupTests: XCTestCase {
+    func testOnlyCurrentDisplayRequestDecodesAndDestroyedControllersDoNoWork() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let paths = KeelPaths(applicationSupportDirectory: directory)
+        let store = try KeelStore(paths: paths)
+        let calls = Mutex(0)
+        let decoder: @Sendable (URL, Int) -> KeelHomeSceneDecoder.Decoded? = { _, _ in
+            calls.withLock { $0 += 1 }
+            return nil
+        }
+        var discarded: KeelHomeSceneController? = KeelHomeSceneController(
+            store: store, paths: paths, window: { nil }, persistSettings: { _ in }, decodeImage: decoder)
+        discarded?.arriveAtHome()
+        discarded = nil
+        let current = KeelHomeSceneController(
+            store: store, paths: paths, window: { nil }, persistSettings: { _ in }, decodeImage: decoder)
+        for _ in 0..<20 { current.arriveAtHome() }
+        // Let queued main-actor requests and their worker completions drain.
+        try await Task.sleep(for: .milliseconds(200))
+        XCTAssertEqual(calls.withLock { $0 }, 1, "Only the surviving controller's latest request should decode")
+        withExtendedLifetime(current) {}
+    }
+
     func testStoredImportedSelectionWinsWhenPreferencesArriveBeforeLibrary() async throws {
         let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }

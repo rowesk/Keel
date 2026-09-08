@@ -22,6 +22,7 @@ final class KeelHomeSceneController {
 
     typealias PersistSettings = @MainActor (KeelSettings) -> Void
 
+    private let decodeImage: @Sendable (URL, Int) -> KeelHomeSceneDecoder.Decoded?
     private let store: KeelStore
     private let paths: KeelPaths
     private let persistSettings: PersistSettings
@@ -61,8 +62,10 @@ final class KeelHomeSceneController {
         store: KeelStore,
         paths: KeelPaths,
         window: @escaping @MainActor () -> NSWindow? = { NSApp.mainWindow },
-        persistSettings: @escaping PersistSettings
+        persistSettings: @escaping PersistSettings,
+        decodeImage: @escaping @Sendable (URL, Int) -> KeelHomeSceneDecoder.Decoded? = KeelHomeSceneDecoder.decode
     ) {
+        self.decodeImage = decodeImage
         self.store = store
         self.paths = paths
         self.window = window
@@ -307,9 +310,15 @@ final class KeelHomeSceneController {
     private func loadImage(for scene: KeelHomeScene, generation: Int?) {
         guard let url = fileURL(for: scene.id) else { return }
         let pixelWidth = backingPixelWidth
+        let decodeImage = decodeImage
         Task { @MainActor [weak self] in
+            // Requests can be superseded before their task starts. Do not launch
+            // a costly decode for a discarded controller or an obsolete display.
+            guard self != nil,
+                  generation == nil || generation == self?.displayGeneration
+            else { return }
             let decoded = await Task.detached(priority: generation == nil ? .utility : .userInitiated) {
-                KeelHomeSceneDecoder.decode(url: url, maximumPixelSize: pixelWidth)
+                decodeImage(url, pixelWidth)
             }.value
             guard let self, let image = decoded?.image else { return }
             self.images[scene.id] = image
@@ -328,6 +337,7 @@ final class KeelHomeSceneController {
         guard !pendingThumbnails.contains(id), let url = fileURL(for: id) else { return }
         pendingThumbnails.insert(id)
         Task { @MainActor [weak self] in
+            guard self != nil else { return }
             let decoded = await Task.detached(priority: .utility) {
                 KeelHomeSceneDecoder.decode(url: url, maximumPixelSize: Self.thumbnailPixelWidth)
             }.value

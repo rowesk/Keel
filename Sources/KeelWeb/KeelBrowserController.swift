@@ -1350,7 +1350,11 @@ public final class KeelBrowserController: NSObject, WKScriptMessageHandler {
             }
             KeelWebViewFactory.restoreInteractionState(self.unarchiveInteractionState(interactionState), in: webView)
             try? await Task.sleep(for: .milliseconds(100))
+            // isLoading becomes true before didStart consumes the pending
+            // binding. A cold WebKit process can stay in that gap past 100 ms.
+            // A URL load here would replace the restoration and lose its scroll.
             guard !Task.isCancelled,
+                  !webView.isLoading,
                   self.context(for: webView) === context,
                   let fallbackBinding = context.removePendingBinding(navigationID: binding.navigationID)
             else {

@@ -820,6 +820,14 @@ final class KeelWebOffscreenIntegrationMatrixTests: XCTestCase {
     }
 
     func testInteractionStateRestoresNavigationAndScrollAfterNonRetainedUndo() async throws {
+        try await checkRestoredScroll(delayedPolicy: false)
+    }
+
+    func testRestoredScrollSurvivesNavigationPolicySlowerThanFallback() async throws {
+        try await checkRestoredScroll(delayedPolicy: true)
+    }
+
+    private func checkRestoredScroll(delayedPolicy: Bool) async throws {
         let fixture = try KeelOffscreenLoopbackFixture(routes: [
             "/state": .init(body: """
             <!doctype html><title>State</title>
@@ -832,7 +840,7 @@ final class KeelWebOffscreenIntegrationMatrixTests: XCTestCase {
         let store = try KeelStore(databaseURL: directory.appendingPathComponent("Keel.sqlite3"))
         _ = try await store.apply([.replaceSettings(KeelSettings(keepsClosedPageReady: false))])
         let coordinator = KeelCoordinator(store: store)
-        let factory = RecordingWebViewFactory(websiteDataStore: .nonPersistent())
+        let factory = RecordingWebViewFactory(websiteDataStore: .nonPersistent(), delaysRestoredPolicy: delayedPolicy)
         let host = NSView(frame: NSRect(x: 0, y: 0, width: 640, height: 480))
         let window = attachOffscreen(host)
         window.setContentSize(NSSize(width: 640, height: 480))
@@ -1083,19 +1091,21 @@ private final class DownloadNavigationProbe: NSObject, WKNavigationDelegate {
 private final class RecordingWebViewFactory {
     let websiteDataStore: WKWebsiteDataStore
     let allowsScriptedPopups: Bool
+    let delaysRestoredPolicy: Bool
     private(set) var webViews: [WKWebView] = []
 
-    init(websiteDataStore: WKWebsiteDataStore, allowsScriptedPopups: Bool = false) {
+    init(websiteDataStore: WKWebsiteDataStore, allowsScriptedPopups: Bool = false, delaysRestoredPolicy: Bool = false) {
         self.websiteDataStore = websiteDataStore
         self.allowsScriptedPopups = allowsScriptedPopups
+        self.delaysRestoredPolicy = delaysRestoredPolicy
     }
 
     func make(configuration: WKWebViewConfiguration) -> WKWebView {
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = allowsScriptedPopups
-        let webView = KeelWebViewFactory.make(
-            configuration: configuration,
-            websiteDataStore: websiteDataStore
-        )
+        configuration.websiteDataStore = websiteDataStore
+        let webView = delaysRestoredPolicy && !webViews.isEmpty
+            ? DelayedPolicyWebView(frame: .zero, configuration: configuration)
+            : KeelWebViewFactory.make(configuration: configuration, websiteDataStore: websiteDataStore)
         webViews.append(webView)
         return webView
     }
