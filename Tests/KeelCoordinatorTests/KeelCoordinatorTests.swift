@@ -788,8 +788,8 @@ struct KeelCoordinatorTests {
         defer { fixture.remove() }
         let clock = FixtureClock(Date(timeIntervalSince1970: 10_000))
         let store = try fixture.store(clock: clock)
-        let selectedURL = try #require(URL(string: "https://example-store.myshopify.test/admin"))
-        let suggestion = try await recordSuggestion(url: selectedURL, input: "examp", store: store, clock: clock)
+        let selectedURL = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
+        let suggestion = try await recordSuggestion(url: selectedURL, input: "sampl", store: store, clock: clock)
         let coordinator = coordinator(store: store, clock: clock)
         _ = try await coordinator.start()
         let activeURL = try #require(URL(string: "https://active.example"))
@@ -801,7 +801,7 @@ struct KeelCoordinatorTests {
         let result = try await coordinator.handle(
             .selectHistorySuggestion(
                 historyURLID: suggestion.historyURLID,
-                typedInput: "examp",
+                typedInput: "sampl",
                 disposition: .open
             )
         )
@@ -818,7 +818,7 @@ struct KeelCoordinatorTests {
                 source: .suggestion
             ),
         ])
-        let promoted = try await store.addressSuggestions(for: "examp")
+        let promoted = try await store.addressSuggestions(for: "sampl")
         let selected = try #require(promoted.suggestions.first { $0.historyURLID == suggestion.historyURLID })
         #expect(selected.addressChoiceCount == 1)
     }
@@ -829,8 +829,8 @@ struct KeelCoordinatorTests {
         defer { fixture.remove() }
         let clock = FixtureClock(Date(timeIntervalSince1970: 10_000))
         let store = try fixture.store(clock: clock)
-        let selectedURL = try #require(URL(string: "https://example-store.myshopify.test/admin"))
-        let suggestion = try await recordSuggestion(url: selectedURL, input: "examp", store: store, clock: clock)
+        let selectedURL = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
+        let suggestion = try await recordSuggestion(url: selectedURL, input: "sampl", store: store, clock: clock)
         let coordinator = coordinator(store: store, clock: clock)
         _ = try await coordinator.start()
         let activeURL = try #require(URL(string: "https://active.example"))
@@ -842,7 +842,7 @@ struct KeelCoordinatorTests {
         let result = try await coordinator.handle(
             .selectHistorySuggestion(
                 historyURLID: suggestion.historyURLID,
-                typedInput: "examp",
+                typedInput: "sampl",
                 disposition: .enqueue
             )
         )
@@ -851,7 +851,7 @@ struct KeelCoordinatorTests {
         #expect(result.state?.activePage == activePage)
         #expect(result.state?.runtimeState.queue.map(\.url) == [firstQueuedURL, selectedURL])
         #expect(result.effects == [.captureReceipt(url: selectedURL, added: true)])
-        let promoted = try await store.addressSuggestions(for: "examp")
+        let promoted = try await store.addressSuggestions(for: "sampl")
         let selected = try #require(promoted.suggestions.first { $0.historyURLID == suggestion.historyURLID })
         #expect(selected.addressChoiceCount == 1)
     }
@@ -883,8 +883,8 @@ struct KeelCoordinatorTests {
         defer { fixture.remove() }
         let clock = FixtureClock(Date(timeIntervalSince1970: 10_000))
         let store = try fixture.store(clock: clock)
-        let selectedURL = try #require(URL(string: "https://example-store.myshopify.test/admin"))
-        let suggestion = try await recordSuggestion(url: selectedURL, input: "examp", store: store, clock: clock)
+        let selectedURL = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
+        let suggestion = try await recordSuggestion(url: selectedURL, input: "sampl", store: store, clock: clock)
         let coordinator = coordinator(store: store, clock: clock)
         _ = try await coordinator.start()
         let activeURL = try #require(URL(string: "https://active.example"))
@@ -895,7 +895,7 @@ struct KeelCoordinatorTests {
         let result = try await coordinator.handle(
             .selectHistorySuggestion(
                 historyURLID: suggestion.historyURLID,
-                typedInput: "examp",
+                typedInput: "sampl",
                 disposition: .open
             )
         )
@@ -921,8 +921,8 @@ struct KeelCoordinatorTests {
         defer { fixture.remove() }
         let clock = FixtureClock(Date(timeIntervalSince1970: 10_000))
         let store = try fixture.store(clock: clock)
-        let selectedURL = try #require(URL(string: "https://example-store.myshopify.test/admin"))
-        let suggestion = try await recordSuggestion(url: selectedURL, input: "examp", store: store, clock: clock)
+        let selectedURL = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
+        let suggestion = try await recordSuggestion(url: selectedURL, input: "sampl", store: store, clock: clock)
         let coordinator = coordinator(store: store, clock: clock)
         _ = try await coordinator.start()
         let activeURL = try #require(URL(string: "https://active.example"))
@@ -936,14 +936,14 @@ struct KeelCoordinatorTests {
         let result = try await coordinator.handle(
             .selectHistorySuggestion(
                 historyURLID: suggestion.historyURLID,
-                typedInput: "examp",
+                typedInput: "sampl",
                 disposition: .open
             )
         )
 
         #expect(result.effects == [.dismissDetour(detour)])
         #expect(result.state?.activePage == activePage)
-        let unchanged = try await store.addressSuggestions(for: "examp")
+        let unchanged = try await store.addressSuggestions(for: "sampl")
         let selected = try #require(unchanged.suggestions.first { $0.historyURLID == suggestion.historyURLID })
         #expect(selected.addressChoiceCount == 0)
     }
@@ -963,7 +963,7 @@ struct KeelCoordinatorTests {
         let result = try await coordinator.handle(
             .selectHistorySuggestion(
                 historyURLID: Int64.max,
-                typedInput: "examp",
+                typedInput: "sampl",
                 disposition: .open
             )
         )
@@ -980,8 +980,8 @@ struct KeelCoordinatorTests {
         let clock = FixtureClock(Date(timeIntervalSince1970: 10_000))
         let faultControl = StoreFaultControl()
         let store = try fixture.store(clock: clock, faultInjector: faultControl.inject)
-        let selectedURL = try #require(URL(string: "https://example-store.myshopify.test/admin"))
-        let suggestion = try await recordSuggestion(url: selectedURL, input: "examp", store: store, clock: clock)
+        let selectedURL = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
+        let suggestion = try await recordSuggestion(url: selectedURL, input: "sampl", store: store, clock: clock)
         let coordinator = coordinator(store: store, clock: clock)
         _ = try await coordinator.start()
         let activeURL = try #require(URL(string: "https://active.example"))
@@ -993,14 +993,14 @@ struct KeelCoordinatorTests {
             _ = try await coordinator.handle(
                 .selectHistorySuggestion(
                     historyURLID: suggestion.historyURLID,
-                    typedInput: "examp",
+                    typedInput: "sampl",
                     disposition: .open
                 )
             )
         }
 
         #expect((await coordinator.state())?.activePage == activePage)
-        let unchanged = try await store.addressSuggestions(for: "examp")
+        let unchanged = try await store.addressSuggestions(for: "sampl")
         let selected = try #require(unchanged.suggestions.first { $0.historyURLID == suggestion.historyURLID })
         #expect(selected.addressChoiceCount == 0)
     }
@@ -1012,8 +1012,8 @@ struct KeelCoordinatorTests {
         let clock = FixtureClock(Date(timeIntervalSince1970: 10_000))
         let faultControl = StoreFaultControl()
         let store = try fixture.store(clock: clock, faultInjector: faultControl.inject)
-        let selectedURL = try #require(URL(string: "https://example-store.myshopify.test/admin"))
-        let suggestion = try await recordSuggestion(url: selectedURL, input: "examp", store: store, clock: clock)
+        let selectedURL = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
+        let suggestion = try await recordSuggestion(url: selectedURL, input: "sampl", store: store, clock: clock)
         let coordinator = coordinator(store: store, clock: clock)
         _ = try await coordinator.start()
         faultControl.failingChangeIndex = 1
@@ -1022,7 +1022,7 @@ struct KeelCoordinatorTests {
             _ = try await coordinator.handle(
                 .selectHistorySuggestion(
                     historyURLID: suggestion.historyURLID,
-                    typedInput: "examp",
+                    typedInput: "sampl",
                     disposition: .enqueue
                 )
             )
@@ -1031,7 +1031,7 @@ struct KeelCoordinatorTests {
         let state = try #require(await coordinator.state())
         #expect(state.activePage == nil)
         #expect(state.runtimeState.queue.isEmpty)
-        let unchanged = try await store.addressSuggestions(for: "examp")
+        let unchanged = try await store.addressSuggestions(for: "sampl")
         let selected = try #require(unchanged.suggestions.first { $0.historyURLID == suggestion.historyURLID })
         #expect(selected.addressChoiceCount == 0)
     }
@@ -1043,8 +1043,8 @@ struct KeelCoordinatorTests {
         let clock = FixtureClock(Date(timeIntervalSince1970: 10_000))
         let faultControl = StoreFaultControl()
         let store = try fixture.store(clock: clock, faultInjector: faultControl.inject)
-        let selectedURL = try #require(URL(string: "https://example-store.myshopify.test/admin"))
-        let suggestion = try await recordSuggestion(url: selectedURL, input: "examp", store: store, clock: clock)
+        let selectedURL = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
+        let suggestion = try await recordSuggestion(url: selectedURL, input: "sampl", store: store, clock: clock)
         let coordinator = coordinator(store: store, clock: clock)
         _ = try await coordinator.start()
         faultControl.failingChangeIndex = 1
@@ -1053,7 +1053,7 @@ struct KeelCoordinatorTests {
             _ = try await coordinator.handle(
                 .selectHistorySuggestion(
                     historyURLID: suggestion.historyURLID,
-                    typedInput: "examp",
+                    typedInput: "sampl",
                     disposition: .open
                 )
             )
@@ -1062,7 +1062,7 @@ struct KeelCoordinatorTests {
         let state = try #require(await coordinator.state())
         #expect(state.activePage == nil)
         #expect(state.runtimeState.activeSession == nil)
-        let unchanged = try await store.addressSuggestions(for: "examp")
+        let unchanged = try await store.addressSuggestions(for: "sampl")
         let selected = try #require(unchanged.suggestions.first { $0.historyURLID == suggestion.historyURLID })
         #expect(selected.addressChoiceCount == 0)
     }

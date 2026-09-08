@@ -179,7 +179,7 @@ final class KeelAddressPaletteTests: XCTestCase {
 
     func testKeyboardMovesSelectionAndReturnOpensHighlightedSuggestion() {
         let palette = KeelAddressPaletteController()
-        palette.updateQuery("eden")
+        palette.updateQuery("shop")
         palette.setSuggestions(
             [suggestion(id: "one"), suggestion(id: "two")],
             forQueryGeneration: palette.queryGeneration,
@@ -198,12 +198,12 @@ final class KeelAddressPaletteTests: XCTestCase {
             return XCTFail("Return did not open the highlighted History row")
         }
         XCTAssertEqual(selected.id, "two")
-        XCTAssertEqual(input, "eden")
+        XCTAssertEqual(input, "shop")
     }
 
     func testOptionReturnQueuesHighlightedSuggestion() {
         let palette = KeelAddressPaletteController()
-        palette.updateQuery("eden")
+        palette.updateQuery("shop")
         palette.setSuggestions(
             [suggestion(id: "one")],
             forQueryGeneration: palette.queryGeneration,
@@ -218,12 +218,12 @@ final class KeelAddressPaletteTests: XCTestCase {
             return XCTFail("Option Return did not queue the highlighted History row")
         }
         XCTAssertEqual(selected.id, "one")
-        XCTAssertEqual(input, "eden")
+        XCTAssertEqual(input, "shop")
     }
 
     func testIconReplacementDoesNotRebuildRowsOrLoseSelection() {
         let palette = KeelAddressPaletteController()
-        palette.updateQuery("eden")
+        palette.updateQuery("shop")
         palette.setSuggestions(
             [suggestion(id: "one"), suggestion(id: "two")],
             forQueryGeneration: palette.queryGeneration,
@@ -240,7 +240,7 @@ final class KeelAddressPaletteTests: XCTestCase {
         )
 
         XCTAssertEqual(palette.selectedSuggestionIDForTesting, "two")
-        XCTAssertEqual(palette.currentQuery, "eden")
+        XCTAssertEqual(palette.currentQuery, "shop")
     }
 
     func testRowsResolvingToTheSamePlaceCollapseToOne() {
@@ -317,12 +317,12 @@ final class KeelAddressPaletteTests: XCTestCase {
             addressSuggestionPresenter: presenter
         )
         let host = NSView()
-        palette.present(over: host, initialQuery: "eden")
+        palette.present(over: host, initialQuery: "shop")
         var received: KeelCoordinatorEvent?
         presenter.onSuggestionAccepted = { received = $0 }
 
         delegate.submitAddressPalette(
-            .openSuggestion(suggestion(id: "one"), input: "eden"),
+            .openSuggestion(suggestion(id: "one"), input: "shop"),
             detourIsActiveOverride: true
         )
 
@@ -330,7 +330,7 @@ final class KeelAddressPaletteTests: XCTestCase {
             return XCTFail("The delegate did not route the suggestion to the coordinator")
         }
         XCTAssertEqual(historyURLID, 1)
-        XCTAssertEqual(typedInput, "eden")
+        XCTAssertEqual(typedInput, "shop")
         XCTAssertEqual(disposition, .open)
         XCTAssertTrue(palette.isPresented)
         palette.dismiss(notify: false)
@@ -341,7 +341,7 @@ final class KeelAddressPaletteTests: XCTestCase {
         let presenter = KeelAddressSuggestionPresenter(
             lookup: { _ in
                 try await Task.sleep(for: .seconds(1))
-                return [Self.historySuggestion(id: 1, hostname: "eden")]
+                return [Self.historySuggestion(id: 1, hostname: "shop")]
             }
         )
         presenter.onSuggestions = { _, _, _ in
@@ -349,7 +349,7 @@ final class KeelAddressPaletteTests: XCTestCase {
         }
         let delegate = KeelApplicationDelegate(addressSuggestionPresenter: presenter)
 
-        presenter.queryDidChange("eden", generation: 1)
+        presenter.queryDidChange("shop", generation: 1)
         delegate.dismissAddressPaletteForTransition()
         await presenter.waitForIdleForTesting()
 
@@ -360,7 +360,7 @@ final class KeelAddressPaletteTests: XCTestCase {
         let transport = FaviconTransportProbe()
         let loader = KeelFaviconLoader(transport: transport)
         let presenter = KeelAddressSuggestionPresenter(
-            lookup: { _ in [Self.historySuggestion(id: 1, hostname: "eden")] },
+            lookup: { _ in [Self.historySuggestion(id: 1, hostname: "shop")] },
             faviconLoader: loader,
             stableListDelay: .seconds(1)
         )
@@ -370,7 +370,7 @@ final class KeelAddressPaletteTests: XCTestCase {
         }
         let delegate = KeelApplicationDelegate(addressSuggestionPresenter: presenter)
 
-        presenter.queryDidChange("eden", generation: 1)
+        presenter.queryDidChange("shop", generation: 1)
         await suggestionsVisible.wait()
         delegate.dismissAddressPaletteForTransition()
         await presenter.waitForIdleForTesting()
@@ -401,8 +401,8 @@ final class KeelAddressPaletteTests: XCTestCase {
         KeelAddressPaletteSuggestion(
             id: id,
             historyURLID: Int64(id == "one" ? 1 : 2),
-            title: "Example store",
-            address: "https://example-store.myshopify.test/admin/\(id)"
+            title: "Sample store",
+            address: "https://sample-store.myshopify.test/admin/\(id)"
         )
     }
 

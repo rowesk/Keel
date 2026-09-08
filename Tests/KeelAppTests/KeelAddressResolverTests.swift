@@ -5,13 +5,13 @@ import KeelStore
 final class KeelAddressResolverTests: XCTestCase {
     func testBareHostnameUsesHTTPSNavigation() {
         let result = KeelAddressResolver.resolve(
-            "example-store.myshopify.test/admin",
+            "sample-store.myshopify.test/admin",
             searchProvider: .google
         )
 
         XCTAssertEqual(
             result,
-            .navigation(URL(string: "https://example-store.myshopify.test/admin")!)
+            .navigation(URL(string: "https://sample-store.myshopify.test/admin")!)
         )
     }
 

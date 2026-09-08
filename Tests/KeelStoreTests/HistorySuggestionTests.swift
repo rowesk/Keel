@@ -11,13 +11,13 @@ struct HistorySuggestionTests {
         let store = try KeelStore(databaseURL: fixture.databaseURL)
         let session = BrowsingSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 1))
         _ = try await store.apply([.upsertSession(session)])
-        let url = try #require(URL(string: "https://example-store.myshopify.test/admin"))
-        _ = try await store.recordHistoryVisit(HistoryVisitEvent(url: url, title: "Example store control", visitedAt: Date(timeIntervalSince1970: 2), browsingSessionID: session.id, source: .typedAddress))
+        let url = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
+        _ = try await store.recordHistoryVisit(HistoryVisitEvent(url: url, title: "Sample store control", visitedAt: Date(timeIntervalSince1970: 2), browsingSessionID: session.id, source: .typedAddress))
 
-        let examp = try await store.addressSuggestions(for: "examp").suggestions
+        let examp = try await store.addressSuggestions(for: "sampl").suggestions
         #expect(examp.map(\.url) == [url])
         #expect(examp.first?.match == HistorySuggestionMatch(quality: .hostnamePrefix, field: .hostname))
-        #expect((try await store.addressSuggestions(for: "fragrances").suggestions).first?.match == HistorySuggestionMatch(quality: .tokenBoundaryPrefix, field: .hostname))
+        #expect((try await store.addressSuggestions(for: "store").suggestions).first?.match == HistorySuggestionMatch(quality: .tokenBoundaryPrefix, field: .hostname))
         #expect((try await store.addressSuggestions(for: "shopi").suggestions).first?.match == HistorySuggestionMatch(quality: .contiguousSubstring, field: .hostname))
         #expect((try await store.addressSuggestions(for: "admin").suggestions).first?.match == HistorySuggestionMatch(quality: .tokenBoundaryPrefix, field: .path))
     }
@@ -173,14 +173,14 @@ struct HistorySuggestionTests {
         let store = try KeelStore(databaseURL: fixture.databaseURL)
         let session = BrowsingSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 1))
         _ = try await store.apply([.upsertSession(session)])
-        let desiredURL = try #require(URL(string: "https://example-store.myshopify.test/admin"))
+        let desiredURL = try #require(URL(string: "https://sample-store.myshopify.test/admin"))
         _ = try await store.recordHistoryVisit(HistoryVisitEvent(url: desiredURL, visitedAt: Date(timeIntervalSince1970: 2), browsingSessionID: session.id, source: .typedAddress))
         for index in 0 ..< 600 {
             let url = try #require(URL(string: "https://unrelated\(index).example/catalog"))
             _ = try await store.recordHistoryVisit(HistoryVisitEvent(url: url, visitedAt: Date(timeIntervalSince1970: TimeInterval(index + 3)), browsingSessionID: session.id, source: .link))
         }
 
-        let suggestions = try await store.addressSuggestions(for: "examp", limit: 6).suggestions
+        let suggestions = try await store.addressSuggestions(for: "sampl", limit: 6).suggestions
         #expect(suggestions.map(\.url).contains(desiredURL))
         #expect(suggestions.count <= 6)
     }
@@ -191,7 +191,7 @@ struct HistorySuggestionTests {
         defer { fixture.remove() }
         _ = try KeelStore(databaseURL: fixture.databaseURL)
         let database = try SQLiteDatabase(url: fixture.databaseURL)
-        let lowerBound = "examp"
+        let lowerBound = "sampl"
         let upperBound = lowerBound + "\u{10FFFF}"
         let hostnamePlan = try database.rows(
             "EXPLAIN QUERY PLAN SELECT id FROM history_urls WHERE host_folded >= ? AND host_folded < ?",

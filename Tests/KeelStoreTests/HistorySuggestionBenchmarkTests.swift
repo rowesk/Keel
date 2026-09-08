@@ -23,9 +23,9 @@ struct HistorySuggestionBenchmarkTests {
         _ = try await store.apply([.upsertSession(session)])
         try await seed(entryCount: entryCount, into: store, sessionID: session.id)
 
-        let prefixTimings = try await timings(for: "examp", expectedHostname: "example-store.myshopify.test", store: store)
-        let substringTimings = try await timings(for: "shopi", expectedHostname: "example-store.myshopify.test", store: store)
-        report(entryCount: entryCount, query: "examp", timings: prefixTimings)
+        let prefixTimings = try await timings(for: "sampl", expectedHostname: "sample-store.myshopify.test", store: store)
+        let substringTimings = try await timings(for: "shopi", expectedHostname: "sample-store.myshopify.test", store: store)
+        report(entryCount: entryCount, query: "sampl", timings: prefixTimings)
         report(entryCount: entryCount, query: "shopi", timings: substringTimings)
     }
 
@@ -56,12 +56,12 @@ struct HistorySuggestionBenchmarkTests {
             }
             _ = try await store.recordHistoryVisits(events)
         }
-        guard let targetURL = URL(string: "https://example-store.myshopify.test/admin") else {
+        guard let targetURL = URL(string: "https://sample-store.myshopify.test/admin") else {
             throw HistoryStoreError.invalidURL
         }
         _ = try await store.recordHistoryVisit(HistoryVisitEvent(
             url: targetURL,
-            title: "Example store control",
+            title: "Sample store control",
             visitedAt: Date(timeIntervalSince1970: TimeInterval(entryCount + 1)),
             browsingSessionID: sessionID,
             source: .typedAddress

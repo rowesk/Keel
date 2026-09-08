@@ -11,14 +11,14 @@ struct HistoryCandidateTests {
         let store = try KeelStore(databaseURL: fixture.databaseURL)
         let session = BrowsingSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 1))
         _ = try await store.apply([.upsertSession(session)])
-        let desired = try await store.recordHistoryVisit(HistoryVisitEvent(url: URL(string: "https://example-store.myshopify.test/admin")!, title: "Example store admin", visitedAt: Date(timeIntervalSince1970: 1), browsingSessionID: session.id, source: .typedAddress))
+        let desired = try await store.recordHistoryVisit(HistoryVisitEvent(url: URL(string: "https://sample-store.myshopify.test/admin")!, title: "Sample store admin", visitedAt: Date(timeIntervalSince1970: 1), browsingSessionID: session.id, source: .typedAddress))
         _ = desired
         for index in 0 ..< 600 {
             _ = try await store.recordHistoryVisit(HistoryVisitEvent(url: URL(string: "https://unrelated\(index).example/catalog")!, visitedAt: Date(timeIntervalSince1970: TimeInterval(index + 2)), browsingSessionID: session.id, source: .link))
         }
-        let candidates = try await store.historyCandidates(matching: "examp", limit: 6)
-        #expect(candidates.map(\.url).contains(URL(string: "https://example-store.myshopify.test/admin")!))
-        #expect((try await store.historyCandidates(matching: "fragrances", limit: 6)).count == 1)
+        let candidates = try await store.historyCandidates(matching: "sampl", limit: 6)
+        #expect(candidates.map(\.url).contains(URL(string: "https://sample-store.myshopify.test/admin")!))
+        #expect((try await store.historyCandidates(matching: "store", limit: 6)).count == 1)
         #expect((try await store.historyCandidates(matching: "shopi", limit: 6)).isEmpty)
         #expect((try await store.historyCandidates(matching: "admin", limit: 6)).count == 1)
     }
@@ -30,7 +30,7 @@ struct HistoryCandidateTests {
         let store = try KeelStore(databaseURL: fixture.databaseURL)
         let session = BrowsingSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 1))
         _ = try await store.apply([.upsertSession(session)])
-        let url = URL(string: "https://example-store.myshopify.test/admin")!
+        let url = URL(string: "https://sample-store.myshopify.test/admin")!
         _ = try await store.recordHistoryVisit(HistoryVisitEvent(url: url, visitedAt: Date(timeIntervalSince1970: 2), browsingSessionID: session.id, source: .typedAddress))
         #expect((try await store.historyCandidates(matching: "shopi", limit: 6)).map(\.url) == [url])
     }
