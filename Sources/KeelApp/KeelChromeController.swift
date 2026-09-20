@@ -468,10 +468,17 @@ final class KeelToolbarButton: NSButton {
         updateBackground()
     }
 
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateBackground()
+    }
+
     private func updateBackground() {
-        layer?.backgroundColor = isHovering
-            ? NSColor.quaternaryLabelColor.withAlphaComponent(0.22).cgColor
-            : NSColor.clear.cgColor
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = isHovering
+                ? NSColor.quaternaryLabelColor.withAlphaComponent(0.22).cgColor
+                : NSColor.clear.cgColor
+        }
     }
 }
 

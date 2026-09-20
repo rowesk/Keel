@@ -7,7 +7,7 @@ final class KeelFindController: NSObject, NSSearchFieldDelegate {
     var onDismiss: (() -> Void)?
 
     private let shadowContainer = KeelPanelShadowView()
-    private let panel = NSVisualEffectView()
+    private let panel = KeelFindPanel()
     private let searchField = NSSearchField()
     private let statusLabel = NSTextField(labelWithString: "")
     private let previousButton = KeelToolbarButton()
@@ -130,10 +130,9 @@ final class KeelFindController: NSObject, NSSearchFieldDelegate {
         panel.state = .active
         panel.wantsLayer = true
         panel.layer?.cornerRadius = 13
-        panel.layer?.backgroundColor = KeelDesign.NSSurface.raised.cgColor
         panel.layer?.masksToBounds = true
         panel.layer?.borderWidth = 1
-        panel.layer?.borderColor = KeelDesign.NSSurface.hairline.cgColor
+        panel.refreshColors()
         panel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             panel.leadingAnchor.constraint(equalTo: shadowContainer.leadingAnchor),
@@ -186,5 +185,20 @@ final class KeelFindController: NSObject, NSSearchFieldDelegate {
         button.setAccessibilityLabel(title)
         button.target = self
         button.action = action
+    }
+}
+
+@MainActor
+private final class KeelFindPanel: NSVisualEffectView {
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshColors()
+    }
+
+    func refreshColors() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = KeelDesign.NSSurface.raised.cgColor
+            layer?.borderColor = KeelDesign.NSSurface.hairline.cgColor
+        }
     }
 }

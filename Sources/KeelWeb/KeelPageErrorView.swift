@@ -57,10 +57,21 @@ public final class KeelPageErrorView: NSView {
         setAccessibilityLabel("\(failure.title). \(failure.message)")
     }
 
+    public override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshBackgroundColor()
+    }
+
+    private func refreshBackgroundColor() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = KeelDesign.NSSurface.canvas.cgColor
+        }
+    }
+
     private func build() {
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
-        layer?.backgroundColor = KeelDesign.NSSurface.canvas.cgColor
+        refreshBackgroundColor()
         setAccessibilityElement(true)
         setAccessibilityRole(.group)
 

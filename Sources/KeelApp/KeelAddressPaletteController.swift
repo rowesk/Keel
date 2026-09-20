@@ -106,7 +106,7 @@ final class KeelAddressPaletteController: NSObject, NSTextFieldDelegate {
     private let shadowContainer = KeelPanelShadowView()
     /// Opaque, not a visual effect view. `.popover` material blends with the page
     /// behind it, so the palette turned grey over any light grey site.
-    private let paletteView = NSView()
+    private let paletteView = KeelAddressPalettePanel()
     private let queryField = KeelPaletteQueryField()
     private let fieldRow = NSView()
     private let divider = NSBox()
@@ -564,7 +564,7 @@ final class KeelAddressPaletteController: NSObject, NSTextFieldDelegate {
         paletteView.layer?.masksToBounds = true
         paletteView.layer?.borderWidth = 1
         paletteView.translatesAutoresizingMaskIntoConstraints = false
-        applyPaletteColors()
+        paletteView.refreshColors()
         shadowContainer.addSubview(paletteView)
         NSLayoutConstraint.activate([
             paletteView.leadingAnchor.constraint(equalTo: shadowContainer.leadingAnchor),
@@ -669,13 +669,6 @@ final class KeelAddressPaletteController: NSObject, NSTextFieldDelegate {
 
     /// Reuses existing rows instead of tearing the list down. Rebuilding on every
     /// keystroke made the panel pump open and shut and threw away loaded favicons.
-    private func applyPaletteColors() {
-        paletteView.effectiveAppearance.performAsCurrentDrawingAppearance {
-            paletteView.layer?.backgroundColor = KeelDesign.NSSurface.raised.cgColor
-            paletteView.layer?.borderColor = KeelDesign.NSSurface.hairline.cgColor
-        }
-    }
-
     private func syncSuggestionRows() {
         let wantedIDs = suggestions.map(\.id)
 
@@ -987,6 +980,7 @@ private enum PaletteRowMetrics {
 @MainActor
 private class KeelAddressPaletteRow: NSButton {
     private var trackingArea: NSTrackingArea?
+    private var isSelected = false
     let highlight = NSView()
 
     override init(frame frameRect: NSRect) {
@@ -1035,9 +1029,21 @@ private class KeelAddressPaletteRow: NSButton {
     /// One code path paints selection. The old controller painted it twice with
     /// two different colour intentions, which is why selected rows looked wrong.
     func applySelection(_ isSelected: Bool) {
-        highlight.layer?.backgroundColor = isSelected
-            ? KeelDesign.NSSurface.selection.cgColor
-            : NSColor.clear.cgColor
+        self.isSelected = isSelected
+        refreshSelectionColor()
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshSelectionColor()
+    }
+
+    private func refreshSelectionColor() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            highlight.layer?.backgroundColor = isSelected
+                ? KeelDesign.NSSurface.selection.cgColor
+                : NSColor.clear.cgColor
+        }
     }
 }
 
@@ -1209,5 +1215,21 @@ private final class KeelAddressPaletteActionRow: KeelAddressPaletteRow {
 
     override func mouseEntered(with event: NSEvent) {
         onHover?()
+    }
+}
+
+/// CGColor is a resolved value, so the layer must be repainted on theme changes.
+@MainActor
+private final class KeelAddressPalettePanel: NSView {
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshColors()
+    }
+
+    func refreshColors() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = KeelDesign.NSSurface.raised.cgColor
+            layer?.borderColor = KeelDesign.NSSurface.hairline.cgColor
+        }
     }
 }

@@ -238,9 +238,11 @@ final class KeelAddressBarView: NSControl {
     }
 
     private func updateBackground() {
-        let ink = KeelDesign.NSSurface.ink
-        background.layer?.backgroundColor = ink.withAlphaComponent(isHovering ? 0.1 : 0.06).cgColor
-        background.layer?.borderColor = ink.withAlphaComponent(isHovering ? 0.18 : 0.1).cgColor
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            let ink = KeelDesign.NSSurface.ink
+            background.layer?.backgroundColor = ink.withAlphaComponent(isHovering ? 0.1 : 0.06).cgColor
+            background.layer?.borderColor = ink.withAlphaComponent(isHovering ? 0.18 : 0.1).cgColor
+        }
     }
 
     override func viewDidChangeEffectiveAppearance() {

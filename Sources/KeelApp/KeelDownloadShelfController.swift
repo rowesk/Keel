@@ -381,6 +381,18 @@ private final class KeelDownloadCardView: NSVisualEffectView {
         setAccessibilityLabel("\(item.filename), \(item.statusLine)")
     }
 
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshColors()
+    }
+
+    private func refreshColors() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = KeelDesign.NSSurface.raised.cgColor
+            layer?.borderColor = KeelDesign.NSSurface.hairline.cgColor
+        }
+    }
+
     private func build() {
         material = .underWindowBackground
         blendingMode = .withinWindow
@@ -389,8 +401,7 @@ private final class KeelDownloadCardView: NSVisualEffectView {
         layer?.cornerRadius = 13
         layer?.masksToBounds = true
         layer?.borderWidth = 1
-        layer?.backgroundColor = KeelDesign.NSSurface.raised.cgColor
-        layer?.borderColor = KeelDesign.NSSurface.hairline.cgColor
+        refreshColors()
         translatesAutoresizingMaskIntoConstraints = false
         setAccessibilityElement(true)
         setAccessibilityRole(.group)
